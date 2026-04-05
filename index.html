@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- tells browser: use UTF-8 characters (supports all languages) -->
+  <meta charset="UTF-8" />
+
+  <!-- makes site look correct on mobile screens -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- title shown on browser tab -->
+  <title>Academia — Student Portal</title>
+
+  <!-- link to our CSS file (the styling) -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ========== AUTH SCREEN (Login / Register) ========== -->
+  <!-- shown first, hidden after login -->
+  <div id="auth-screen" class="auth-screen">
+
+    <div class="auth-box">
+
+      <!-- Logo -->
+      <div class="auth-logo">
+        <h1>Academic<span>Friend</span></h1>
+        <p>Your personal B.Tech study portal</p>
+      </div>
+
+      <!-- Tab buttons: Login or Register -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login"
+          onclick="showAuthTab('login')">Login</button>
+        <button class="auth-tab" id="tab-register"
+          onclick="showAuthTab('register')">New student</button>
+      </div>
+
+      <!-- Error / success message box -->
+      <div class="auth-message" id="auth-message"></div>
+
+      <!-- LOGIN FORM -->
+      <form class="auth-form" id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="login-username"
+            placeholder="Enter your username" autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password"
+            placeholder="Enter your password" autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn-primary">Login →</button>
+      </form>
+
+      <!-- REGISTER FORM (hidden by default) -->
+      <form class="auth-form hidden" id="register-form"
+        onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>Full name</label>
+          <input type="text" id="reg-name"
+            placeholder="e.g. Rahul Kumar" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="reg-username"
+            placeholder="Choose a username" autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="reg-password"
+            placeholder="Choose a password" autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="reg-password-confirm" placeholder="Re-enter your password" />
+        </div>
+
+        <!-- Branch selector — student picks their branch -->
+        <div class="form-group">
+          <label>Branch</label>
+          <select id="reg-branch">
+            <option value="">Select your branch</option>
+            <option value="CSE">CSE / IT — Computer Science</option>
+            <option value="CSE_AIML">B.Tech CSE (AI & ML)</option>
+            <option value="ECE">ECE / EEE — Electronics</option>
+            <option value="MECH">Mechanical Engineering</option>
+            <option value="CIVIL">Civil Engineering</option>
+            <option value="EE">Electrical Engineering</option>
+            <option value="CUSTOM">Other — I'll add subjects manually</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary">Create account →</button>
+      </form>
+
+    </div>
+  </div>
+
+
+  <!-- ========== MAIN APP (shown after login) ========== -->
+  <div id="app-screen" class="app-screen hidden">
+
+    <!-- TOP NAVIGATION BAR -->
+    <nav class="topnav">
+
+      <!-- Left: Logo -->
+      <div class="nav-logo">Academic<span>Friend</span></div>
+
+      <!-- Center: Semester tabs (Sem 1 to Sem 8) -->
+      <div class="nav-sems" id="nav-sems">
+        <!-- filled by JavaScript -->
+      </div>
+
+      <!-- Right: user info + logout -->
+      <div class="nav-right">
+        <input type="file" id="profile-upload" hidden accept="image/*" onchange="updateProfilePhoto(this)" />
+        
+        <div class="nav-avatar" id="nav-avatar" onclick="document.getElementById('profile-upload').click()" style="cursor:pointer">R</div>
+        
+        <span class="nav-username" id="nav-username">Student</span>
+        <button class="btn-logout" onclick="handleLogout()">Logout</button>
+      </div>
+    </nav>
+
+    <!-- PAGE TABS (below nav — switches between sections) -->
+    <div class="page-tabs">
+      <button class="page-tab active" onclick="showPage('dashboard')">
+        Dashboard
+      </button>
+      <button class="page-tab" onclick="showPage('subjects')">
+        Subjects
+      </button>
+      <button class="page-tab" onclick="showPage('materials')">
+        Materials
+      </button>
+      <button class="page-tab" onclick="showPage('marks')">
+        Marks &amp; Graphs
+      </button>
+      <button class="page-tab" onclick="showPage('exams')">
+        Exam Calendar
+      </button>
+      <button class="page-tab" onclick="showPage('cgpa')">
+        CGPA Tracker
+      </button>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-content">
+
+      <!-- DASHBOARD PAGE -->
+      <div class="page active" id="page-dashboard">
+
+        <div class="page-header">
+          <h2 id="dash-title">Dashboard</h2>
+          <p id="dash-sub">Welcome back! Here's your overview.</p>
+        </div>
+
+        <!-- 4 stat cards at top -->
+        <div class="stat-row">
+          <div class="stat-card">
+            <div class="stat-label">Current semester</div>
+            <div class="stat-value accent" id="stat-sem">Sem 1</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Subjects</div>
+            <div class="stat-value" id="stat-subjects">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Resources saved</div>
+            <div class="stat-value green" id="stat-resources">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Next exam in</div>
+            <div class="stat-value red" id="stat-exam">—</div>
+          </div>
+        </div>
+
+        <!-- Two columns: subjects + upcoming exams -->
+        <div class="dash-grid">
+
+          <div class="card">
+            <div class="card-title">Subjects this semester</div>
+            <div id="dash-subjects-list">
+              <p class="empty-msg">No subjects yet.
+                Go to the Subjects tab to add some.</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Upcoming exams &amp; deadlines</div>
+            <div id="dash-exams-list">
+              <p class="empty-msg">No exams added yet.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- SUBJECTS PAGE -->
+      <div class="page hidden" id="page-subjects">
+
+        <div class="page-header">
+          <h2>Subjects — <span id="subj-sem-label">Semester 1</span></h2>
+          <p>Add, rename or delete subjects for this semester.</p>
+        </div>
+
+        <!-- Add subject form -->
+        <div class="add-form card">
+          <input type="text" id="new-subject-name"
+            placeholder="Subject name (e.g. Data Structures)" />
+          <select id="new-subject-type">
+            <option value="Core">Core</option>
+            <option value="Lab">Lab</option>
+            <option value="Elective">Elective</option>
+          </select>
+          <button class="btn-accent" onclick="addSubject()">+ Add subject</button>
+        </div>
+
+        <!-- Subject cards grid -->
+        <div class="subjects-grid" id="subjects-grid">
+          <!-- filled by JavaScript -->
+        </div>
+
+      </div>
+
+
+      <!-- MATERIALS PAGE -->
+      <div class="page hidden" id="page-materials">
+
+        <div class="page-header">
+          <h2>Materials</h2>
+          <p>Select a subject to manage its study resources.</p>
+        </div>
+
+        <!-- Subject selector -->
+        <div class="subject-selector" id="material-subject-selector">
+          <!-- filled by JavaScript -->
+        </div>
+
+        <!-- Material content (shown after subject selected) -->
+        <div id="material-content" class="hidden">
+
+          <div class="material-tabs">
+            <button class="mat-tab active"
+              onclick="showMatTab('books')">Prescribed books</button>
+            <button class="mat-tab"
+              onclick="showMatTab('notes')">Notes &amp; slides</button>
+            <button class="mat-tab"
+              onclick="showMatTab('youtube')">YouTube links</button>
+            <button class="mat-tab"
+              onclick="showMatTab('assignments')">Assignments</button>
+            <button class="mat-tab"
+              onclick="showMatTab('pyqs')">PYQs</button>
+          </div>
+
+          <!-- Add resource form -->
+          <div class="add-form card">
+            <input type="text" id="res-name"
+              placeholder="Name (e.g. Thomas Calculus Unit 3)" />
+            <input type="url" id="res-url"
+              placeholder="Link / URL (optional)" />
+            <label class="file-label">
+              Upload file
+              <input type="file" id="res-file" accept=".pdf,.ppt,.pptx,.jpg,.png" />
+            </label>
+            <button class="btn-accent" onclick="addResource()">+ Add</button>
+          </div>
+
+          <!-- Resource list -->
+          <div class="resource-list" id="resource-list">
+            <!-- filled by JavaScript -->
+          </div>
+
+          <!-- Topics checklist -->
+          <div class="card" style="margin-top:16px">
+            <div class="card-title">
+              Syllabus topics
+              <button class="btn-small" onclick="addTopic()">+ Add topic</button>
+            </div>
+            <div class="topics-wrap" id="topics-wrap">
+              <!-- filled by JavaScript -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- MARKS PAGE -->
+      <div class="page hidden" id="page-marks">
+
+        <div class="page-header">
+          <h2>Marks &amp; Performance</h2>
+          <p>Track your scores. Charts update automatically.</p>
+        </div>
+
+        <!-- Subject selector -->
+        <div class="subject-selector" id="marks-subject-selector">
+          <!-- filled by JavaScript -->
+        </div>
+
+        <div id="marks-content" class="hidden">
+
+          <!-- Summary cards -->
+          <div class="stat-row" id="marks-summary">
+            <!-- filled by JavaScript -->
+          </div>
+
+          <!-- Add marks form -->
+          <div class="add-form card">
+            <select id="marks-type">
+              <option value="unit">Unit Test</option>
+              <option value="mid">Mid Term</option>
+              <option value="end">End Sem</option>
+            </select>
+            <input type="number" id="marks-score"
+              placeholder="Score (e.g. 72)" min="0" max="200" />
+            <input type="number" id="marks-outof"
+              placeholder="Out of (e.g. 100)" min="1" max="200" />
+            <input type="text" id="marks-label"
+              placeholder="Label (e.g. Unit Test 1)" />
+            <button class="btn-accent" onclick="addMarks()">+ Add marks</button>
+          </div>
+
+          <!-- Performance chart -->
+          <div class="card">
+            <div class="card-title">Performance chart</div>
+            <canvas id="marks-chart" height="220"></canvas>
+          </div>
+
+          <!-- Marks history table -->
+          <div class="card">
+            <div class="card-title">All entries</div>
+            <div id="marks-table"></div>
+          </div>
+
+          <!-- All subjects comparison chart -->
+          <div class="card">
+            <div class="card-title">
+              All subjects — semester comparison
+            </div>
+            <canvas id="sem-chart" height="180"></canvas>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- EXAM CALENDAR PAGE -->
+      <div class="page hidden" id="page-exams">
+
+        <div class="page-header">
+          <h2>Exam &amp; Deadline Calendar</h2>
+          <p>Never miss a date again.</p>
+        </div>
+
+        <!-- Add exam form -->
+        <div class="add-form card">
+          <input type="text" id="exam-name"
+            placeholder="Name (e.g. DBMS Mid Term)" />
+          <select id="exam-sem-sel">
+            <!-- filled by JS -->
+          </select>
+          <select id="exam-type">
+            <option value="unit">Unit Test</option>
+            <option value="mid">Mid Term</option>
+            <option value="end">End Sem</option>
+            <option value="assignment">Assignment</option>
+            <option value="other">Other</option>
+          </select>
+          <input type="date" id="exam-date" />
+          <button class="btn-accent" onclick="addExam()">+ Add</button>
+        </div>
+
+        <!-- Exam list -->
+        <div id="exam-list">
+          <!-- filled by JavaScript -->
+        </div>
+
+      </div>
+
+
+      <!-- CGPA TRACKER PAGE -->
+      <div class="page hidden" id="page-cgpa">
+
+        <div class="page-header">
+          <h2>CGPA Tracker</h2>
+          <p>Estimated from marks entered across all semesters.</p>
+        </div>
+
+        <!-- Big CGPA number -->
+        <div class="cgpa-hero">
+          <div class="cgpa-number" id="cgpa-number">—</div>
+          <div class="cgpa-label">Estimated CGPA (10-point scale)</div>
+        </div>
+
+        <!-- Per-semester GPA grid -->
+        <div class="sem-gpa-grid" id="sem-gpa-grid">
+          <!-- filled by JavaScript -->
+        </div>
+
+        <!-- CGPA trend chart -->
+        <div class="card">
+          <div class="card-title">GPA trend across semesters</div>
+          <canvas id="cgpa-chart" height="200"></canvas>
+        </div>
+
+        <!-- Grade scale reference -->
+        <div class="card">
+          <div class="card-title">Grade scale reference</div>
+          <div class="grade-scale">
+            <div class="grade-item">
+              <span class="grade-range green">90–100%</span>
+              <span class="grade-letter">O</span>
+              <span class="grade-points">10 pts</span>
+            </div>
+            <div class="grade-item">
+              <span class="grade-range accent">80–89%</span>
+              <span class="grade-letter">A+</span>
+              <span class="grade-points">9 pts</span>
+            </div>
+            <div class="grade-item">
+              <span class="grade-range accent">70–79%</span>
+              <span class="grade-letter">A</span>
+              <span class="grade-points">8 pts</span>
+            </div>
+            <div class="grade-item">
+              <span class="grade-range amber">60–69%</span>
+              <span class="grade-letter">B+</span>
+              <span class="grade-points">7 pts</span>
+            </div>
+            <div class="grade-item">
+              <span class="grade-range amber">50–59%</span>
+              <span class="grade-letter">B</span>
+              <span class="grade-points">6 pts</span>
+            </div>
+            <div class="grade-item">
+              <span class="grade-range red">Below 50%</span>
+              <span class="grade-letter">F</span>
+              <span class="grade-points">0 pts</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+  <!-- Link to our JavaScript file (always at bottom of body) -->
+  <script src="script.js"></script>
+
+</body>
+</html>
